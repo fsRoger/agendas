@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7eeec;
+  --foreground: #341a34;
+  --color-vallue-bg: #f7eeec;
+  --color-vallue-surface: #ffffff;
+  --color-vallue-plum: #341a34;
+  --color-vallue-plum-light: #5c3a5c;
+  --color-vallue-rose: #a6607a;
+  --color-vallue-rose-light: #d9a9b8;
+  --color-vallue-border: #e8d7d3;
+  --color-vallue-taken: #ded2d8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-vallue-bg: var(--color-vallue-bg);
+  --color-vallue-surface: var(--color-vallue-surface);
+  --color-vallue-plum: var(--color-vallue-plum);
+  --color-vallue-plum-light: var(--color-vallue-plum-light);
+  --color-vallue-rose: var(--color-vallue-rose);
+  --color-vallue-rose-light: var(--color-vallue-rose-light);
+  --color-vallue-border: var(--color-vallue-border);
+  --color-vallue-taken: var(--color-vallue-taken);
+  --font-serif-display: "Georgia", "Times New Roman", serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }

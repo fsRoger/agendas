@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vallue Studio — Agendamentos
 
-## Getting Started
+Sistema de agendamento online. Cliente escolhe serviço, data e horário
+disponíveis em `/cilios`, reserva o horário e paga um sinal de 30% via Pix
+(chave estática, sem gateway de pagamento). Admins logam em `/admin` para ver
+e confirmar/cancelar agendamentos.
 
-First, run the development server:
+## 1. Criar o projeto no Supabase
+
+1. Crie uma conta/projeto em [supabase.com](https://supabase.com).
+2. Vá em **SQL Editor** e rode o conteúdo de [`supabase/schema.sql`](supabase/schema.sql)
+   inteiro. Isso cria as tabelas, a trava contra choque de horário e já
+   cadastra o local "cílios" com os 6 serviços do catálogo.
+3. Crie os 3 logins de admin (e-mail + senha) e já vincule o papel de cada
+   um. Duas formas:
+
+   **A. Script (mais rápido)** — depois de preencher `.env.local` (passo 2),
+   edite os e-mails/senhas no topo de
+   [`scripts/create-admins.mjs`](scripts/create-admins.mjs) e rode:
+
+   ```bash
+   node --env-file=.env.local scripts/create-admins.mjs
+   ```
+
+   Isso cria os 3 usuários no Supabase Auth e já grava o papel de cada um
+   na tabela `profiles`, tudo de uma vez.
+
+   **B. Manual, pelo painel** — em **Authentication > Users > Add user**,
+   crie cada login (e-mail + senha) e anote o **User UID**. Depois, no
+   **SQL Editor**, rode (trocando pelos UIDs reais):
+
+   ```sql
+   insert into profiles (id, role, display_name) values
+     ('uuid-do-master', 'master', 'Master'),
+     ('uuid-do-adminC', 'adminC', 'Admin Cílios'),
+     ('uuid-do-adminU', 'adminU', 'Admin Unhas');
+   ```
+
+   - `master` vê e gerencia todos os locais.
+   - `adminC` só vê os agendamentos de cílios.
+   - `adminU` já existe para quando o serviço de unhas for adicionado.
+
+5. Em **Project Settings > API**, copie a **Project URL**, a **anon public
+   key** e a **service_role key** (essa última é secreta — nunca vai para o
+   navegador).
+
+## 2. Variáveis de ambiente
+
+Copie `.env.local.example` para `.env.local` e preencha:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`: valores do passo anterior.
+- `PIX_KEY`: a chave Pix que vai receber o sinal (CPF/CNPJ, e-mail, telefone
+  ou chave aleatória).
+- `PIX_RECEIVER_NAME`: nome do recebedor como deve aparecer no app do banco
+  de quem paga (máx. 25 caracteres, sem acento).
+- `PIX_RECEIVER_CITY`: cidade do recebedor (máx. 15 caracteres, sem acento).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+O QR Code e o código "copia e cola" são gerados localmente (algoritmo padrão
+do Banco Central), sem nenhuma API de pagamento envolvida — o valor cobrado
+é sempre calculado no servidor a partir do preço do serviço, nunca confiado
+ao que vem do navegador.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Rodar localmente
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Abra [http://localhost:3000](http://localhost:3000) — a página inicial linka
+para `/cilios` (agendamento) e `/admin/login` (painel).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. Deploy na Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Suba o projeto para um repositório Git e importe na Vercel.
+2. Em **Settings > Environment Variables**, adicione as mesmas variáveis do
+   `.env.local`.
+3. Deploy. O link de `/cilios` é o que vai para as clientes.
 
-## Deploy on Vercel
+## Regras de agenda (cílios)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Dias | Horários |
+| --- | --- |
+| Domingo, Sábado | 10:00, 14:00, 18:00 |
+| Segunda, Quarta, Sexta | 17:00 |
+| Terça, Quinta | Fechado |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O intervalo mínimo de 4h entre atendimentos já está garantido pela própria
+grade de horários. Para mudar dias/horários, edite `SCHEDULE` em
+[`lib/availability.ts`](lib/availability.ts).
+
+## Estrutura
+
+- `app/cilios` — fluxo público de agendamento.
+- `app/admin` — painel protegido (login + lista de agendamentos).
+- `app/api/cilios` — disponibilidade e criação de reserva.
+- `app/api/admin` — listagem/atualização de agendamentos (autenticado).
+- `lib/availability.ts` — regras de dias/horários abertos.
+- `lib/pix.ts` — geração do payload Pix (EMV/BR Code) e QR Code.
+- `supabase/schema.sql` — schema completo do banco + seed do catálogo.
+
+## Próximo serviço (unhas)
+
+O banco já suporta múltiplos locais (`locations`) e o papel `adminU` já
+existe. Para adicionar "unhas": inserir o local e os serviços no banco,
+criar `app/unhas/page.tsx` (copiando o padrão de `app/cilios/page.tsx`) e as
+rotas equivalentes em `app/api/unhas/`.
