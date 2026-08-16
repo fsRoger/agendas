@@ -1,16 +1,4 @@
-// Regras de agenda do estúdio de cílios.
-// 0 = domingo, 1 = segunda, ..., 6 = sábado.
-// Terça e quinta ficam fechadas. Os horários do mesmo dia já respeitam o
-// intervalo mínimo de 4h entre atendimentos por construção.
-const SCHEDULE: Record<number, string[]> = {
-  0: ["10:00", "14:00", "18:00"], // domingo
-  1: ["17:00"], // segunda
-  2: [], // terça — fechado
-  3: ["17:00"], // quarta
-  4: [], // quinta — fechado
-  5: ["17:00"], // sexta
-  6: ["10:00", "14:00", "18:00"], // sábado
-};
+import type { WeekSchedule } from "@/lib/locations-config";
 
 export const DAYS_AHEAD = 45;
 
@@ -19,16 +7,16 @@ export const DAYS_AHEAD = 45;
 // servidor.
 const SP_OFFSET = "-03:00";
 
-export function slotsForWeekday(weekday: number): string[] {
-  return SCHEDULE[weekday] ?? [];
+export function slotsForWeekday(schedule: WeekSchedule, weekday: number): string[] {
+  return schedule[weekday] ?? [];
 }
 
-export function isOpenDay(weekday: number): boolean {
-  return slotsForWeekday(weekday).length > 0;
+export function isOpenDay(schedule: WeekSchedule, weekday: number): boolean {
+  return slotsForWeekday(schedule, weekday).length > 0;
 }
 
-export function isValidSlot(weekday: number, time: string): boolean {
-  return slotsForWeekday(weekday).includes(time);
+export function isValidSlot(schedule: WeekSchedule, weekday: number, time: string): boolean {
+  return slotsForWeekday(schedule, weekday).includes(time);
 }
 
 export function todayISOInSaoPaulo(): string {
@@ -64,13 +52,13 @@ export interface OpenDate {
   weekday: number;
 }
 
-export function upcomingOpenDates(daysAhead = DAYS_AHEAD): OpenDate[] {
+export function upcomingOpenDates(schedule: WeekSchedule, daysAhead = DAYS_AHEAD): OpenDate[] {
   const today = todayISOInSaoPaulo();
   const results: OpenDate[] = [];
   for (let i = 0; i < daysAhead; i++) {
     const date = addDaysISO(today, i);
     const weekday = weekdayOfISO(date);
-    if (isOpenDay(weekday)) results.push({ date, weekday });
+    if (isOpenDay(schedule, weekday)) results.push({ date, weekday });
   }
   return results;
 }

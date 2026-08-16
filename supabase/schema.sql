@@ -135,6 +135,28 @@ where l.slug = 'cilios'
   );
 
 -- ---------------------------------------------------------------------------
+-- Seed: local + catálogo de unhas (Thany Studio, Barueri/SP)
+-- ---------------------------------------------------------------------------
+
+insert into locations (slug, name)
+values ('unhas', 'Thany Studio')
+on conflict (slug) do nothing;
+
+insert into services (location_id, category, name, price_cents, active)
+select l.id, v.category, v.name, v.price_cents, true
+from locations l
+join (values
+  ('Serviços', 'Alongamento no molde F1', 8000),
+  ('Serviços', 'Manutenção do alongamento', 5000),
+  ('Serviços', 'Banho de gel', 6000),
+  ('Serviços', 'Esmaltação em gel', 4500)
+) as v(category, name, price_cents) on true
+where l.slug = 'unhas'
+  and not exists (
+    select 1 from services s where s.location_id = l.id and s.name = v.name
+  );
+
+-- ---------------------------------------------------------------------------
 -- Depois de rodar este arquivo, crie os 3 admins:
 -- 1. Painel Supabase > Authentication > Users > Add user (e-mail + senha)
 -- 2. Para cada um, rode (trocando o uuid pelo "User UID" mostrado no painel):

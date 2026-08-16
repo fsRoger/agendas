@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { centsToBRL, formatDateLabel } from "@/lib/format";
 import type { AppointmentStatus, AppointmentWithDetails, Role } from "@/lib/types";
 import { weekdayOfISO } from "@/lib/availability";
+import { getLocationConfig } from "@/lib/locations-config";
 
 const STATUS_LABELS: Record<AppointmentStatus, string> = {
   pending: "Aguardando sinal",
@@ -17,10 +18,10 @@ const STATUS_STYLES: Record<AppointmentStatus, string> = {
   cancelled: "bg-vallue-taken text-vallue-plum-light",
 };
 
-const LOCATION_LABELS: Record<string, string> = {
-  cilios: "Cílios",
-  unhas: "Unhas",
-};
+function locationLabel(slug: string): string {
+  const config = getLocationConfig(slug);
+  return config ? `${config.studioName} (${config.serviceLabel})` : slug;
+}
 
 export default function AppointmentsClient({ role }: { role: Role }) {
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
@@ -88,7 +89,7 @@ export default function AppointmentsClient({ role }: { role: Role }) {
               active={locationFilter === slug}
               onClick={() => setLocationFilter(slug)}
             >
-              {LOCATION_LABELS[slug] ?? slug}
+              {locationLabel(slug)}
             </FilterButton>
           ))}
         </div>
@@ -128,7 +129,7 @@ export default function AppointmentsClient({ role }: { role: Role }) {
                   </span>
                   {role === "master" && appt.locations && (
                     <span className="text-xs text-vallue-plum-light">
-                      {LOCATION_LABELS[appt.locations.slug] ?? appt.locations.slug}
+                      {locationLabel(appt.locations.slug)}
                     </span>
                   )}
                 </div>
