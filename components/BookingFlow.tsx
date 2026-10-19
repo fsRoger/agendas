@@ -7,6 +7,7 @@ import { centsToBRL, formatDateLabel } from "@/lib/format";
 import { getLocationConfig, type LocationSlug } from "@/lib/locations-config";
 import type { Service } from "@/lib/types";
 import LotusMotif from "@/components/LotusMotif";
+import GemIcon from "@/components/GemIcon";
 
 interface DaySlot {
   time: string;
@@ -168,7 +169,10 @@ export default function BookingFlow({ locationSlug }: { locationSlug: LocationSl
           </p>
 
           <div className="rounded-2xl border border-vallue-border bg-vallue-surface p-5 mb-6">
-            <p className="text-sm text-vallue-plum-light">{result.appointment.serviceName}</p>
+            <p className="flex items-center gap-2 text-sm text-vallue-plum-light">
+              <GemIcon name={result.appointment.serviceName} size={20} />
+              {result.appointment.serviceName}
+            </p>
             <p className="text-lg font-medium">
               {formatDateLabel(
                 result.appointment.date,
@@ -213,7 +217,7 @@ export default function BookingFlow({ locationSlug }: { locationSlug: LocationSl
           </div>
 
           <Link
-            href={`/${locationSlug}`}
+            href={`/agendamento/${locationSlug}`}
             className="block text-center text-xs text-vallue-plum-light underline"
           >
             Fazer outro agendamento
@@ -264,15 +268,18 @@ export default function BookingFlow({ locationSlug }: { locationSlug: LocationSl
                           type="button"
                           key={service.id}
                           onClick={() => setServiceId(service.id)}
-                          className={`rounded-xl border px-3 py-3 text-left transition ${
+                          className={`flex items-start gap-2 rounded-xl border px-3 py-3 text-left transition ${
                             serviceId === service.id
                               ? "border-vallue-rose bg-vallue-rose-light/20"
                               : "border-vallue-border bg-vallue-surface hover:border-vallue-rose"
                           }`}
                         >
-                          <span className="block text-sm font-medium">{service.name}</span>
-                          <span className="block text-sm text-vallue-plum-light">
-                            {centsToBRL(service.price_cents)}
+                          <GemIcon name={service.name} size={26} className="mt-0.5 shrink-0" />
+                          <span>
+                            <span className="block text-sm font-medium">{service.name}</span>
+                            <span className="block text-sm text-vallue-plum-light">
+                              {centsToBRL(service.price_cents)}
+                            </span>
                           </span>
                         </button>
                       ))}

@@ -13,7 +13,7 @@ export default function Home() {
           {Object.values(LOCATIONS).map((location) => (
             <Link
               key={location.slug}
-              href={`/${location.slug}`}
+              href={`/agendamento/${location.slug}`}
               className="flex items-center gap-4 rounded-2xl border border-vallue-border bg-vallue-surface px-6 py-5 text-left shadow-sm transition hover:border-vallue-rose"
             >
               {location.logoSrc && (

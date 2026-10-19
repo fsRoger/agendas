@@ -38,7 +38,7 @@ export const LOCATIONS: Record<LocationSlug, LocationConfig> = {
     minGapHours: 4,
     depositPercent: 30,
     pixEnvSuffix: "CILIOS",
-    logoSrc: "/brand/vallue-mark.jpg",
+    logoSrc: "/vallue-mark.jpg",
     decorative: true,
     schedule: {
       0: ["10:00", "14:00", "18:00"], // domingo

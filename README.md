@@ -1,9 +1,47 @@
-# Vallue Studio — Agendamentos
+# Vallue Studio — Blog + Agendamentos
 
-Sistema de agendamento online. Cliente escolhe serviço, data e horário
-disponíveis em `/cilios`, reserva o horário e paga um sinal de 30% via Pix
-(chave estática, sem gateway de pagamento). Admins logam em `/admin` para ver
-e confirmar/cancelar agendamentos.
+Site do Vallue Studio (extensão de cílios, Jandira/SP), feito em Next.js +
+Tailwind e hospedado na Vercel.
+
+## O site
+
+| Rota | O que é |
+| --- | --- |
+| `/` | Home: apresentação, últimos posts, técnicas, cuidados e contato |
+| `/blog` e `/blog/<slug>` | Posts sobre cuidados e curiosidades |
+| `/tecnicas` | Técnicas e valores (do catálogo oficial) |
+| `/videos` | Vídeos do YouTube/Instagram (aparece no menu quando houver vídeos) |
+| `/contato` | WhatsApp, Instagram, endereço e formulário |
+| `/agendamento` | Agendamento online com sinal via Pix — fora do menu e do Google |
+| `/admin` | Painel: agendamentos e mensagens do formulário |
+
+### Onde editar o conteúdo
+
+- **Posts:** um arquivo `.md` por post em [`content/posts/`](content/posts). O nome
+  do arquivo vira a URL. Copie um post existente e troque o cabeçalho
+  (`title`, `description`, `date`, `category`, `gem`; opcionalmente
+  `cover: /blog/foto.jpg` para usar uma foto salva em `public/blog/`, ou
+  `draft: true` para esconder). Formatação aceita: `##`/`###` títulos,
+  listas com `-` ou `1.`, `> citação`, `**negrito**`, `*itálico*` e
+  `[link](url)`.
+- **Vídeos:** cole os links em [`lib/videos.ts`](lib/videos.ts).
+- **Técnicas, preços e cuidados:** [`lib/techniques.ts`](lib/techniques.ts).
+- **WhatsApp, Instagram, endereço:** [`lib/site.ts`](lib/site.ts).
+- **Cores da marca:** [`app/globals.css`](app/globals.css) (paleta oficial).
+
+### Formulário de contato
+
+As mensagens ficam salvas no Supabase (tabela `contact_messages`) e aparecem
+em `/admin/mensagens`. Se o banco já existia antes do blog, rode
+[`supabase/migrations/2026-10-17_contact_messages.sql`](supabase/migrations/2026-10-17_contact_messages.sql)
+no SQL Editor. Se o envio falhar, o formulário oferece mandar pelo WhatsApp.
+
+## Agendamento (parte separada)
+
+O sistema abaixo continua funcionando em `/agendamento/cilios` e
+`/agendamento/unhas` (os links antigos `/cilios` e `/unhas` redirecionam).
+Cliente escolhe serviço, data e horário, reserva e paga um sinal de 30% via Pix
+(chave estática, sem gateway de pagamento).
 
 ## 1. Criar o projeto no Supabase
 
@@ -72,15 +110,16 @@ npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) — a página inicial linka
-para `/cilios` (agendamento) e `/admin/login` (painel).
+Abra [http://localhost:3000](http://localhost:3000) para ver o blog.
+O agendamento fica em `/agendamento` e o painel em `/admin/login`.
 
 ## 4. Deploy na Vercel
 
 1. Suba o projeto para um repositório Git e importe na Vercel.
 2. Em **Settings > Environment Variables**, adicione as mesmas variáveis do
    `.env.local`.
-3. Deploy. O link de `/cilios` é o que vai para as clientes.
+3. Deploy. O domínio principal abre o blog; o link de agendamento é
+   `/agendamento/cilios`.
 
 ## Regras de agenda (cílios)
 
@@ -96,7 +135,9 @@ grade de horários. Para mudar dias/horários, edite `SCHEDULE` em
 
 ## Estrutura
 
-- `app/cilios` — fluxo público de agendamento.
+- `app/(site)` — blog e páginas públicas (header/footer próprios).
+- `content/posts` — posts em Markdown.
+- `app/agendamento` — fluxo público de agendamento.
 - `app/admin` — painel protegido (login + lista de agendamentos).
 - `app/api/cilios` — disponibilidade e criação de reserva.
 - `app/api/admin` — listagem/atualização de agendamentos (autenticado).

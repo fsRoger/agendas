@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getAuthedProfile } from "@/lib/auth";
 import AppointmentsClient from "./AppointmentsClient";
 import LogoutButton from "./LogoutButton";
@@ -34,6 +35,14 @@ export default async function AdminPage() {
           <h1 className="font-serif-display text-2xl">Agendamentos</h1>
           <p className="text-sm text-vallue-plum-light mt-1">
             {ROLE_LABELS[profile.role] ?? profile.role}
+            {profile.role !== "adminU" && (
+              <>
+                {" · "}
+                <Link href="/admin/mensagens" className="underline">
+                  Mensagens do site
+                </Link>
+              </>
+            )}
           </p>
         </div>
         <LogoutButton />
